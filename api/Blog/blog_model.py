@@ -1,4 +1,3 @@
-from sqlalchemy.orm import backref
 from api import db
 from datetime import datetime
 from api.Tags_Blog.tag_blog_table import tag_blog
