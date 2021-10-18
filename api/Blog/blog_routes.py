@@ -1,3 +1,6 @@
+import re
+
+from flask.globals import request
 from api.Tag.tag_model import Tag
 from api.Blog.blog_model import Blog
 from types import MethodDescriptorType
@@ -29,3 +32,49 @@ def create_blog():
 
     blog_id = getattr(new_blog, 'id')
     return jsonify({'id': blog_id})
+
+
+@blogs.route('/blogs', methods=["GET"])
+def get_all_blogs():
+    blogs = Blog.query.all()
+    serialized_data = []
+    for blog in blogs:
+        serialized_data.append(blog.serialize)
+
+    return jsonify({"all_blogs": serialized_data})
+
+
+@blogs.route('/blog/<int:id>', methods=['GET'])
+def get_single_blog(id):
+    blog = Blog.query.filter_by(id=id).first()
+    serialized_blog = blog.serialize
+    serialized_blog['tags'] = []
+
+    for tag in blog.tags:
+        serialized_blog['tags'].append(tag.serialize)
+
+    return jsonify({"single_blog": serialized_blog})
+
+
+@blogs.route('/update_blog/<int:id>', methods=['PUT'])
+def update_blog(id):
+    data = request.get_json()
+    blog = Blog.query.filter_by(id=id).first_or_404()
+
+    blog.title = data['title']
+    blog.content = data['content']
+    blog.feature_image = data['featured_image']
+
+    updated_blog = blog.serialize
+
+    db.session.commit()
+    return jsonify({'blog_id': blog.id})
+
+
+@blogs.route('/delete_blog/<int:db>', methods=['DELETE'])
+def delete_blog(id):
+    blog = Blog.query.filter_by(id=id).first()
+    db.session.delete(blog)
+    db.session.commit()
+
+    return jsonify("Blog was deleted"), 200
