@@ -1,17 +1,25 @@
+import click
 from flask import Flask
+from flask.cli import FlaskGroup
 from app.config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, migrate
+from flask import Blueprint
 
 db = SQLAlchemy()
-migrate = Migrate()
+
+bp = Blueprint('blog', __name__)
 
 
-def create_app():
-    app = Flask(__name__)
+@bp.cli.command('create')
+def create_app(create):
+    app = Flask('create')
     app.config.from_object(Config)
     db.init_app(app)
-    migrate.init_app(
-        app=app, db=db, directory="/home/koose/EntertainmentMp3/src/app/database/migrations")
-
+    app.register_blueprint(bp)
     return app
+
+
+@click.group(cls=FlaskGroup, create_app=create_app)
+def cli():
+    """Koose is Here"""
