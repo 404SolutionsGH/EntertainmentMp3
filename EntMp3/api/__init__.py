@@ -6,7 +6,7 @@ import click
 from flask.cli import with_appcontext
 from werkzeug.security import generate_password_hash
 
-from api.Blog.blog_model import blogs
+from api import blogs
 
 
 db = SQLAlchemy()
